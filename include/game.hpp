@@ -1,4 +1,5 @@
 #include "glogal.hpp"
+#include "InputField.hpp"
 
 const int WIDTH = 1280;
 const int HEIGHT = 800;
@@ -9,7 +10,13 @@ std::map<int, std::pair<sf::CircleShape, std::pair<std::pair<std::pair<int, bool
 std::map<int, std::pair<sf::CircleShape, std::pair<float, float>>> eats;
 private:
     //variables
+    int SCENE = 1;
+    bool CONSOLE = false;
+
     sf::RenderWindow window;
+    InputField inputField;
+    sf::Font font_w;
+    sf::Font font_d;
     bool new_cell = false;
     int pos_x = 0;
     int pos_y = 0;
@@ -22,7 +29,7 @@ private:
 
     int speed = 1;
 
-    int SCENE = 1;
+    std::string text;
 
 
     //function
@@ -38,6 +45,10 @@ private:
 
     void events();
     void update_scene_game();
+
+    void console(); 
+
+    void font_init();
 
 public:
     Game();

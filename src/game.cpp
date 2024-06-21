@@ -2,21 +2,34 @@
 
 
 Game::Game() : window(sf::VideoMode(WIDTH, HEIGHT), "SFML Window") {
-    // Инициализация окна при создании объекта класса Game
+    if (!font_d.loadFromFile("../font/SAIBA-45-d.otf") && !font_w.loadFromFile("../font/Sclate.ttf")) {
+        window.close();
+    }
+    
 }
 
 Game::~Game() {
 
 }
+void Game::run() {
+    //inputField.init(100, 100, 600, 50, font_w);
+    while (window.isOpen()) {
+        events();
+        menu();
+        //inputField.draw(window);
+        window.setFramerateLimit(fps);
+        window.display();
+    }
+}  
 
-void Game::menu()
-{
-    if (SCENE == 0) {
-        //window.clear(sf::Color(::White));
-        //window.setFramerateLimit(fps);
-
+void Game::console() {
     
+}
 
+void Game::menu() {
+    if (SCENE == 0) {
+        window.clear(sf::Color(0, 0, 0));
+        // ...
         window.display();
     } else if (SCENE == 1) {
         life();
@@ -25,18 +38,21 @@ void Game::menu()
             createCell(pos_x, pos_y, 1);
             new_cell = false;
         }
-        update_scene_game();
+        window.clear(sf::Color(0, 100,0));
+        for (const auto& eat : eats) {
+            window.draw(eat.second.first);
+        }
+        for (const auto& cell : cells) {
+            window.draw(cell.second.first);
+        }
+        
     }
     
 }
 
-
-void Game::run() {
-    while (window.isOpen()) {
-        events();
-        menu();
-    }
-}  
+void Game::font_init() {
+    
+}
 
 void Game::events() {
     sf::Event event;
@@ -52,21 +68,33 @@ void Game::events() {
             pos_y = event.mouseButton.y;
             new_cell = true;
         }
+        if (event.type == sf::Event::KeyPressed) {
+            
+        }
+        if (event.type == sf::Event::KeyReleased) {
+            
+        }
+        // // if (event.type == sf::Event::TextEntered && CONSOLE) {
+        // //     cmd.typedOn(event);
+        // // }
+        // if (event.type == sf::Event::KeyPressed) {
+        //     if (event.key.code == sf::Keyboard::Enter) {
+        //         std::cout << "Entered text: " << inputField.getText() << std::endl;
+        //         // if (cmd.isEnterPressed()) {
+                    
+        //         //     cmd.resetEnterPressed();
+        //         // }
+        //     // } else if (event.key.code == sf::Keyboard::F1) {
+        //     //     CONSOLE = !CONSOLE;
+        //     //     cmd.setVisible(CONSOLE);
+        //     }
+        // }
+        // inputField.handleEvent(event);
     }
 }
 
 void Game::update_scene_game() {
-    window.clear(sf::Color::White);
-    window.setFramerateLimit(fps);
-
-    for (const auto& eat : eats) {
-        window.draw(eat.second.first);
-    }
-    for (const auto& cell : cells) {
-        window.draw(cell.second.first);
-    }
-
-    window.display();
+    
 }
 
 void Game::createCell(float pos_x, float pos_y, int type) {
