@@ -6,9 +6,26 @@ const int HEIGHT = 800;
 
 
 class Game {
-std::map<int, std::pair<sf::CircleShape, std::pair<std::pair<std::pair<int, bool>, std::pair<int, int>>, std::pair<std::pair<bool, bool>, std::pair<float, float>>>>> cells;
+//std::map<int, std::pair<sf::CircleShape, std::pair<std::pair<std::pair<int, bool>, std::pair<int, int>>, std::pair<std::pair<bool, bool>, std::pair<float, float>>>>> cells;
 std::map<int, std::pair<sf::CircleShape, std::pair<float, float>>> eats;
 private:
+    struct st_cell
+    {
+        int Age; //возраст
+        sf::Vector2f Pos; //позиция
+        sf::Vector2f Direction; //направления
+        int Virus; //стадия вируса
+        int Energy; //энеркия
+        std::list<int> Attraction; //притяжение
+        std::list<int> Repulsion; //отталкиване
+        float VirusChance; //шанс заражения
+        int PowerConsumption; //количество питания
+        float Speed; //скорость
+        float MutationChance; // шанс мутации
+    };
+
+    std::map<int, st_cell> cells;
+    
     //variables
     int SCENE = 1;
     bool CONSOLE = false;
