@@ -27,6 +27,7 @@ private:
     int ages = 20; // среднее продолжительность жизни
     int speed = 1; // в будусщем скорость действий
     bool new_cell = false; //появления новой клетки
+    int RGBChanges = 1;
 
     std::string text; // в будущем текси консли
     sf::Vector2f mousePOS; // позиция мышки
@@ -40,7 +41,7 @@ private:
         sf::Vector2f position; // позиция
         int direction; // направление
         float energy; // энергия
-        sf::Vector3 RGB; // цвет клетки
+        sf::Vector3i RGB; // цвет клетки
         std::vector<std::vector<double>> weights1; // веса нейронной сети 1
         std::vector<std::vector<double>> weights2; // веса нейронной сети 2
     };

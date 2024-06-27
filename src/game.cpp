@@ -84,11 +84,13 @@ void Game::events() {
 
 void Game::createCellNoIntelligence(){
     st_cell new_cell;
+    sf::Vector3i RGB = {10 + rand() % 255, 10 + rand() % 255, 10 + rand() % 255};
     sf::CircleShape circle(5.0f);
-    circle.setFillColor(sf::Color::Green);
+    circle.setFillColor(sf::Color(RGB.x, RGB.y, RGB.z));
     circle.setPosition(mousePOS.x, mousePOS.y);
     new_cell.shape = circle;
     new_cell.age = 0;
+    new_cell.RGB = RGB;
     new_cell.position = mousePOS;
     new_cell.direction = 1 + rand() % 8; 
     new_cell.energy = 50.0f;
@@ -100,14 +102,37 @@ void Game::createCellNoIntelligence(){
 // создание клетки
 void Game::createCell(bool mutation, st_cell &cell) {
     int key = -1'000'000'000 + rand() % 1'000'000'000;
+    int rgb = 1 + rand() % 3;
+    sf::Vector3i RGB;
     st_cell new_cell;
     sf::CircleShape circle(5.0f);
-    circle.setFillColor(sf::Color::Green);
+    switch (rgb)
+    {
+    case 1:
+        if (cell.RGB.x < 255)
+            RGB.x = cell.RGB.x + 1;
+        else
+            RGB.x = 0 + rand() % 255;
+    case 2:
+        if (cell.RGB.y < 255)
+            RGB.y = cell.RGB.y + 1;
+        else
+            RGB.x = 0 + rand() % 255;
+    case 3:
+        if (cell.RGB.z < 255)
+            RGB.z = cell.RGB.z + 1;
+        else
+            RGB.z = 0 + rand() % 255; 
+    default:
+        break;
+    }
+    circle.setFillColor(sf::Color(RGB.x, RGB.y, RGB.z));
     circle.setPosition(cell.position.x, cell.position.x);
     new_cell.shape = circle;
     new_cell.age = 0;
+    new_cell.RGB = RGB;
     new_cell.position = cell.position;
-    new_cell.direction = 1 + rand() % 8; 
+    new_cell.direction = 1 + rand() % 8;
     new_cell.energy = 50.0f;
     new_cell.weights1 = std::vector<std::vector<double>>(inputSize, std::vector<double>(hiddenSize, 0.0));
     new_cell.weights2 = std::vector<std::vector<double>>(hiddenSize, std::vector<double>(outputSize, 0.0));
@@ -245,7 +270,7 @@ void Game::life() {
             cell.energy = 50;
         }
 
-        if (random_bool(1) && cell.age > 30)
+        if (random_bool(1) && cell.age > 15)
             dead_cells.push_back(key); // смерть клетки
 
         cell.shape.setPosition(cell.position.x, cell.position.y);
