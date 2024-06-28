@@ -9,8 +9,8 @@ const int HEIGHT = 800;
 
 class Game {
 private:
-    const int inputSize = 5; // Количество входных нейронов
-    const int hiddenSize = 10; // Количество скрытых нейронов
+    const int inputSize = 9; // Количество входных нейронов
+    const int hiddenSize = 20; // Количество скрытых нейронов
     const int outputSize = 4; // Количество выходных нейронов
     const int eatMAX = 200; // максимально еды
     const int timesMAX = 60;// время одго года в кадрах 
@@ -27,7 +27,9 @@ private:
     int ages = 20; // среднее продолжительность жизни
     int speed = 1; // в будусщем скорость действий
     bool new_cell = false; //появления новой клетки
+    bool stopUPDATE = false;
     int RGBChanges = 1;
+    unsigned long long keyCell = 0;
 
     std::string text; // в будущем текси консли
     sf::Vector2f mousePOS; // позиция мышки
@@ -46,7 +48,7 @@ private:
         std::vector<std::vector<double>> weights2; // веса нейронной сети 2
     };
 
-    std::map<int, st_cell> cells;//клетки
+    std::unordered_map<unsigned long long, st_cell> cells;//клетки
 
     void createCell(bool mutation, st_cell &cell);//создание клетки
     void createCellNoIntelligence();//создание клетки с помошью команды 
