@@ -48,7 +48,7 @@ private:
         std::vector<std::vector<double>> weights2; // веса нейронной сети 2
     };
 
-    std::unordered_map<unsigned long long, st_cell> cells;//клетки
+    std::map<unsigned long long, st_cell> cells;//клетки
 
     void createCell(bool mutation, st_cell &cell);//создание клетки
     void createCellNoIntelligence();//создание клетки с помошью команды 
