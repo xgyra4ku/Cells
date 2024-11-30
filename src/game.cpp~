@@ -19,7 +19,6 @@ void Game::run() {
     createCell(123344);
     window.setFramerateLimit(fps);
 
-    sf::VertexArray visibleCells; // Для хранения видимых клеток
     while (window.isOpen()) {
         events();
 

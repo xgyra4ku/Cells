@@ -30,7 +30,7 @@ class Game {
     // NeuralNetwork nn; // класс нейроннойсети
     // Коэффициент масштабирования
     float zoomFactor = 1.0f;
-    float moveSpeed = 5.0f;
+    float moveSpeed = 10.0f;
     int SCENE = 1; // сцена
     int times = 0;// время 
     int ages = 20; // среднее продолжительность жизни
