@@ -16,9 +16,10 @@ Game::~Game() = default;
 // Главная функция
 void Game::run() {
     sf::Vector2i mousePos = sf::Mouse::getPosition();
-    createCell(123344);
+    //createCell(123344);
     window.setFramerateLimit(fps);
 
+    sf::VertexArray visibleCells; // Для хранения видимых клеток
     while (window.isOpen()) {
         events();
 
@@ -53,6 +54,8 @@ void Game::run() {
         visibleCells.setPrimitiveType(sf::Quads);
 
         for (const auto& cell : cells) {
+            interpret(cell);
+            // Проверка видимости клетки
             if (visibleArea.intersects(cell.shape.getGlobalBounds())) {
                 auto bounds = cell.shape.getGlobalBounds();
                 sf::Color color = cell.shape.getFillColor();
@@ -68,6 +71,131 @@ void Game::run() {
         window.draw(visibleCells);
         window.display();
     }
+}
+
+void Game::interpret(const struct_cell& Cell) {//интерпритация клеток
+    int counter = Cell.programCounter;
+    const int command = Cell.weights1[counter];
+
+
+    if (command == 26) {
+        counter = updateProgramCounterReturn(Cell, 1);
+        const int weight = Cell.weights1[counter];
+        int viewCell = weight % 8;
+        // есть ли клетка там куда хочет переместиться
+        bool isCell = false;
+        for (const auto& cell : cells) {
+            sf::Vector2f pos = cell.shape.getPosition();
+            if (viewCell == 0) {
+                if (pos.x+8 == Cell.shape.getPosition().x && pos.y-8 == Cell.shape.getPosition().y) {
+                    counter = updateProgramCounterReturn(Cell, 1);
+                    isCell = true;
+                    break;
+                } isCell = false;
+            }if (viewCell == 1) {
+                if (pos.x+8 == Cell.shape.getPosition().x && pos.y == Cell.shape.getPosition().y) {
+                    counter = updateProgramCounterReturn(Cell, 2);
+                    isCell = true;
+                    break;
+                }isCell = false;
+            }if (viewCell == 2) {
+                if (pos.x+8 == Cell.shape.getPosition().x && pos.y+8 == Cell.shape.getPosition().y) {
+                    counter = updateProgramCounterReturn(Cell, 3);
+                    isCell = true;
+                    break;
+                }isCell = false;
+            }if (viewCell == 3) {
+                if (pos.x == Cell.shape.getPosition().x && pos.y+8 == Cell.shape.getPosition().y) {
+                    counter = updateProgramCounterReturn(Cell, 4);
+                    isCell = true;
+                    break;
+                }isCell = false;
+            }if (viewCell == 4) {
+                if (pos.x-8 == Cell.shape.getPosition().x && pos.y+8 == Cell.shape.getPosition().y) {
+                    counter = updateProgramCounterReturn(Cell, 5);
+                    isCell = true;
+                    break;;
+                }isCell = false;
+            }if (viewCell == 5) {
+                if (pos.x-8 == Cell.shape.getPosition().x && pos.y == Cell.shape.getPosition().y) {
+                    counter = updateProgramCounterReturn(Cell, 6);
+                    isCell = true;
+                    break;
+                }
+                isCell = false;
+            }if (viewCell == 6) {
+                if (pos.x-8 == Cell.shape.getPosition().x && pos.y-8 == Cell.shape.getPosition().y) {
+                    counter = updateProgramCounterReturn(Cell, 7);
+                    isCell = true;
+                    break;
+                }
+                isCell = false;
+
+            }if (viewCell == 7) {
+                if (pos.x == Cell.shape.getPosition().x && pos.y-8 == Cell.shape.getPosition().y) {
+                    counter = updateProgramCounterReturn(Cell, 8);
+                    isCell = true;
+                    break;
+                }
+                isCell = false;
+            }
+
+        }
+        if (!isCell) {
+            counter = updateProgramCounterReturn(Cell, 9);
+            if (viewCell == 0) {
+                Cell.shape.setPosition(Cell.shape.getPosition().x + 8, Cell.shape.getPosition().y - 8);
+            }if (viewCell == 1) {
+                Cell.shape.setPosition(Cell.shape.getPosition().x + 8, Cell.shape.getPosition().y);
+            }if (viewCell == 2) {
+                Cell.shape.setPosition(Cell.shape.getPosition().x + 8, Cell.shape.getPosition().y + 8);
+            }if (viewCell == 3) {
+                Cell.shape.setPosition(Cell.shape.getPosition().x, Cell.shape.getPosition().y + 8);
+            }if (viewCell == 4) {
+                Cell.shape.setPosition(Cell.shape.getPosition().x - 8, Cell.shape.getPosition().y + 8);
+            }if (viewCell == 5) {
+                Cell.shape.setPosition(Cell.shape.getPosition().x - 8, Cell.shape.getPosition().y);
+            }if (viewCell == 6) {
+                Cell.shape.setPosition(Cell.shape.getPosition().x - 8, Cell.shape.getPosition().y - 8);
+            }if (viewCell == 7) {
+                Cell.shape.setPosition(Cell.shape.getPosition().x, Cell.shape.getPosition().y - 8);
+            }
+        }
+
+    }else if (command == 25) { //фотосинтез
+        counter = updateProgramCounterReturn(Cell, 1);
+        int w = Cell.weights1[counter];
+        int quantity = 1 + (w / 63) * (3 - 1);
+        // for (int i = 0; i < quantity; i++) {
+        //     counter = updateProgramCounterReturn(Cell, 1);
+        //     w = Cell.weights1[counter];
+        //     int type = 1 + (w / 63);
+        //     createCell(type, sf::Vector2f{Cell.shape.getPosition().x+8, Cell.shape.getPosition().y}, Cell.weights1, 4);
+        // }
+        counter = updateProgramCounterReturn(Cell, 1);
+        w = Cell.weights1[counter];
+        int type = 1 + (w / 63);
+        createCell(type, sf::Vector2f{Cell.shape.getPosition().x+8, Cell.shape.getPosition().y}, Cell.weights1, 4);
+        
+        }
+    } else {
+        counter = updateProgramCounterReturn(Cell, counter);
+       // std::cout << counter << std::endl;
+    }
+
+}
+
+void Game::updateProgramCounter(const struct_cell &Cell, const int count) {
+    int counter = Cell.programCounter + count;
+    if (counter > 63) counter = 0;
+    Cell.programCounter = counter;
+}
+
+int Game::updateProgramCounterReturn(const struct_cell &Cell, const int count) {
+    int counter = Cell.programCounter + count;
+    if (counter > 63) counter = 0;
+    Cell.programCounter = counter;
+    return counter;
 }
 
 
@@ -88,7 +216,7 @@ void Game::events() {
             case sf::Event::MouseButtonReleased:
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     mousePOS = {static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y)};
-                    new_cell = true;
+                    createCell();
                 }
                 break;
 
@@ -137,328 +265,27 @@ void Game::createCell(unsigned int seed) {
 }
 
 
+void Game::createCell() {
+    // Создаем генератор случайных чисел
+    std::random_device rd;  // Источник случайности
+    std::mt19937 gen(rd()); // Генератор случайных чисел
+    std::uniform_int_distribution<> distrib(0, 63); // Диапазон значений
 
-//
-// void Game::createCellNoIntelligence(){
-//     st_cell new_cell;
-//     sf::Vector3i RGB = {10 + rand() % 255, 10 + rand() % 255, 10 + rand() % 255};
-//     sf::CircleShape circle(5.0f);
-//     circle.setFillColor(sf::Color(RGB.x, RGB.y, RGB.z));
-//     circle.setPosition(mousePOS.x, mousePOS.y);
-//     new_cell.shape = circle;
-//     new_cell.age = 0;
-//     new_cell.RGB = RGB;
-//     new_cell.position = mousePOS;
-//     new_cell.direction = 1 + rand() % 8;
-//     new_cell.energy = 50.0f;
-//     new_cell.weights1 = std::vector<std::vector<double>>(inputSize, std::vector<double>(hiddenSize, 0.0));
-//     new_cell.weights2 = std::vector<std::vector<double>>(hiddenSize, std::vector<double>(outputSize, 0.0));
-//     createCell(false, new_cell);
-// }
-//
-// // создание клетки
-// void Game::createCell(bool mutation, st_cell &cell) {
-//     int rgb = 1 + rand() % 3;
-//     sf::Vector3i RGB;
-//     st_cell new_cell;
-//     sf::CircleShape circle(5.0f);
-//     switch (rgb)
-//     {
-//     case 1:
-//         if (cell.RGB.x < 255)
-//             RGB.x = cell.RGB.x + 1;
-//         else
-//             RGB.x = 0 + rand() % 255;
-//     case 2:
-//         if (cell.RGB.y < 255)
-//             RGB.y = cell.RGB.y + 1;
-//         else
-//             RGB.x = 0 + rand() % 255;
-//     case 3:
-//         if (cell.RGB.z < 255)
-//             RGB.z = cell.RGB.z + 1;
-//         else
-//             RGB.z = 0 + rand() % 255;
-//     default:
-//         break;
-//     }
-//     // Задание параметров клетки
-//     circle.setFillColor(sf::Color(RGB.x, RGB.y, RGB.z));
-//     circle.setPosition(cell.position.x, cell.position.x);
-//     new_cell.shape = circle;
-//     new_cell.age = 0;
-//     new_cell.RGB = RGB;
-//     new_cell.position = cell.position;
-//     new_cell.direction = 1 + rand() % 8;
-//     new_cell.energy = 50.0f;
-//
-//     // Генерация начальных весов
-//     new_cell.weights1 = std::vector<std::vector<double>>(inputSize, std::vector<double>(hiddenSize, 0.0));
-//     new_cell.weights2 = std::vector<std::vector<double>>(hiddenSize, std::vector<double>(outputSize, 0.0));
-//
-//
-//     // Мутация весов
-//     if (mutation) {
-//         for (int i = 0; i < cell.weights1.size(); ++i) {
-//             for (int j = 0; j < cell.weights1[i].size(); ++j) {
-//                 if ((static_cast<double>(rand()) / RAND_MAX) < mutationRate) {
-//                     new_cell.weights1[i][j] += ((static_cast<double>(rand()) / RAND_MAX) * 0.2 - 0.1);
-//                 }
-//                 else {
-//                     new_cell.weights1[i][j] = cell.weights1[i][j];
-//                 }
-//             }
-//         }
-//         for (int i = 0; i < cell.weights2.size(); ++i) {
-//             for (int j = 0; j < cell.weights2[i].size(); ++j) {
-//                 if ((static_cast<double>(rand()) / RAND_MAX) < mutationRate) {
-//                     new_cell.weights2[i][j] += ((static_cast<double>(rand()) / RAND_MAX) * 0.2 - 0.1);
-//                 }
-//                 else {
-//                     new_cell.weights2[i][j] = cell.weights2[i][j];
-//                 }
-//             }
-//         }
-//     }
-//     else {
-//         for (int i = 0; i < inputSize; ++i) {
-//             for (int j = 0; j < hiddenSize; ++j) {
-//                 new_cell.weights1[i][j] = (static_cast<double>(rand()) / RAND_MAX) * 2 - 1;
-//             }
-//         }
-//         for (int i = 0; i < hiddenSize; ++i) {
-//             for (int j = 0; j < outputSize; ++j) {
-//                 new_cell.weights2[i][j] = (static_cast<double>(rand()) / RAND_MAX) * 2 - 1;
-//             }
-//         }
-//     }
-//
-//     // Добавление новой клетки в коллекцию
-//     cells[keyCell++] = new_cell;
-// }
-//
-// // рандомной 0/1 с указанием процента
-// bool Game::random_bool(float percentage) {
-//     int random_value = 0 + rand() % 100;
-//     return random_value <= percentage;
-// }
-//
-// //добавление еды при необходимости
-// void Game::EatUpdate() {
-//     if (eats.size() <= eatMAX) {
-//         int key = -1'000'000'000 + rand() % 1'000'000'000;
-//         sf::Vector2f pos = {static_cast<float>(0 + rand() % WIDTH), static_cast<float>(0 + rand() % HEIGHT)};
-//         sf::CircleShape circle(2.0f);
-//         circle.setFillColor(sf::Color(208, 24, 225));
-//         circle.setPosition(pos.x, pos.y);
-//         eats[key] = std::make_pair(circle, pos);
-//     }
-// }
-//
-// // проверака дипазона
-// bool Game::isWithinTolerance(int number1, int number2, int tolerance) {
-//     return std::abs(number1 - number2) <= tolerance;
-// }
-//
-// // проверка диапазона клетки в кругу
-// double Game::collision_cell(float x, float y, int type, int radius) {
-//     int el = 0;
-//     for (auto& pair : cells)
-//     {
-//         int key = pair.first;
-//         const st_cell& cell = pair.second;
-//         float X = cell.position.x;
-//         float Y = cell.position.y;
-//
-//         if (isWithinTolerance(X, x, radius) && isWithinTolerance(Y, y, radius))
-//             el++;
-//     }
-//     return el;
-// }
-//
-// // главная жинь
-// void Game::life() {
-//     std::vector<int> dead_eats;
-//     times++;
-//     for(auto& pair : cells) {
-//         const int key = pair.first;
-//         st_cell& cell = pair.second;
-//         sf::Vector2f eat_pos;
-//         sf::Vector2f cell_left_pos;
-//         int key_e;
-//
-//         for (auto& pair_e : cells) {
-//             key_e = pair_e.first;
-//             st_cell& cell_e = pair_e.second;
-//             if (isWithinTolerance(cell.position.x, cell_e.position.x, 20) && isWithinTolerance(cell.position.y, cell_e.position.x, 20)) {
-//                 cell_left_pos = cell_e.position;
-//                 break;
-//             }
-//         }
-//
-//         vector<double> normalizedInput = {
-//             static_cast<double>(cell.age),
-//             static_cast<double>(cell.energy),
-//             static_cast<double>(cell.direction),
-//             static_cast<double>(cell.position.x),
-//             static_cast<double>(cell.position.y),
-//             static_cast<double>(eat_pos.x),
-//             static_cast<double>(eat_pos.y),
-//             static_cast<double>(cell_left_pos.x),
-//             static_cast<double>(cell_left_pos.y)
-//             };
-//
-//         for (auto& val : normalizedInput) {
-//             val /= 2000.0;
-//         }
-//
-//
-//         //у клетки есть 8 направлений взгляда
-//         // output[0] поваачивает в одну сторону на 1
-//         // output[1] поварачивает в другую сторону на 1
-//         // output[2] идти в перед
-//         // output[3] атака
-//
-//
-//         vector<double> output = nn.feedforward(cell.weights1, cell.weights2, normalizedInput);
-//         if (output[0] >= 0.5) {
-//             cell.direction = (cell.direction < 8) ? cell.direction + 1 : 0;
-//         }
-//         if (output[1] >= 0.5) {
-//             cell.direction = (cell.direction > 0) ? cell.direction - 1 : 8;
-//         }
-//         if (output[2] >= 0.5) {
-//             moveCell(cell);
-//         }
-//         if (output[3] >= 0.5) {
-//             for (auto& eat : eats) {
-//                 if (isWithinTolerance(cell.position.x, eat.second.second.x, 20) && isWithinTolerance(cell.position.y, eat.second.second.y, 20)) {
-//                     cell.energy += 10.0f;
-//                     dead_eats.push_back(eat.first);
-//                     eat_pos.x = eat.second.second.x;
-//                     eat_pos.y = eat.second.second.y;
-//                     break;
-//                 }
-//             }
-//         }
-//         // Применение обратного распространения ошибки для обновления весов
-//         // vector<double> targetOutput = { /* цели для обучения */ };
-//         // vector<vector<double>> gradients = nn.backpropagate(cell.weights1, cell.weights2, normalizedInput, targetOutput);
-//
-//         // // Обновление весов с использованием градиентов
-//         // for (int i = 0; i < cell.weights1.size(); ++i) {
-//         //     for (int j = 0; j < cell.weights1[i].size(); ++j) {
-//         //         cell.weights1[i][j] -= learningRate * gradients[i][j];
-//         //     }
-//         // }
-//         // for (int i = 0; i < cell.weights2.size(); ++i) {
-//         //     for (int j = 0; j < cell.weights2[i].size(); ++j) {
-//         //         cell.weights2[i][j] -= learningRate * gradients[i][j];
-//         //     }
-//         // }
-//
-//
-//         if (random_bool(10.0f) && cell.energy >= 100) {
-//             createCell(true, cell);
-//             cell.energy = 50;
-//         }
-//
-//         cell.shape.setPosition(cell.position.x, cell.position.y);
-//
-//         ages = (cell.age + ages) / 2;
-//         cells[key] = cell;
-//     }
-//
-//     if (times >= timesMAX) {
-//         int el = 0;
-//         for (auto& pair : cells) {
-//             int key = pair.first;
-//             st_cell& cell = pair.second;
-//             cell.age++;
-//             cell.energy -= 5;
-//             el++;
-//         }
-//         std::cout << "Elements: " << el << std::endl;
-//         std::cout << "Age: " << ages << std::endl;
-//         times = 0;
-//     }
-//
-//     for (auto& eat : dead_eats) {
-//         eats.erase(eat);
-//     }
-//     for (auto it = cells.begin(); it != cells.end(); ) {
-//         int key = it->first;
-//         st_cell& cell = it->second;
-//         // Условия для удаления клетки
-//         if (cell.age > 20 && random_bool(10.0f)) {
-//             it = cells.erase(it);
-//             // Можно также добавить дополнительные действия, если необходимо
-//         } else {
-//             ++it; // Переход к следующему элементу
-//         }
-//     }
-//
-//     dead_eats.clear();
-// }
-//
-//
-// // передвижени клетки
-//
-// void Game::moveCell(st_cell& cell) {
-//     switch (cell.direction) {
-//     case 1:
-//         if (cell.position.y > 0) {
-//             cell.position.y -= 1;
-//         }
-//         break;
-//     case 2:
-//         if (cell.position.y > 0) {
-//             cell.position.y -= 1;
-//         }
-//         if (cell.position.x < WIDTH - 10) {
-//             cell.position.x += 1;
-//         }
-//         break;
-//     case 3:
-//         if (cell.position.x < WIDTH - 10) {
-//             cell.position.x += 1;
-//         }
-//         break;
-//     case 4:
-//         if (cell.position.y < HEIGHT - 10) {
-//             cell.position.y += 1;
-//         }
-//         if (cell.position.x < WIDTH - 10) {
-//             cell.position.x += 1;
-//         }
-//         break;
-//     case 5:
-//         if (cell.position.y < HEIGHT - 10) {
-//             cell.position.y += 1;
-//         }
-//         break;
-//     case 6:
-//         if (cell.position.x > 0) {
-//             cell.position.x -= 1;
-//         }
-//         if (cell.position.y < HEIGHT - 10) {
-//             cell.position.y += 1;
-//         }
-//         break;
-//     case 7:
-//         if (cell.position.x > 0) {
-//             cell.position.x -= 1;
-//         }
-//         break;
-//     case 8:
-//         if (cell.position.y > 0) {
-//             cell.position.y -= 1;
-//         }
-//         if (cell.position.x > 0) {
-//             cell.position.x -= 1;
-//         }
-//         break;
-//     default:
-//         break;
-//     }
-// }
+    // Создаем клетку
+    sf::RectangleShape rect(sf::Vector2f(8, 8)); // Размер клетки 1x1
+    rect.setPosition(sf::Vector2f( ((mousePOS.x) / 8) * 8, ((mousePOS.y) / 8) * 8)); // Устанавливаем позицию клетки
+    rect.setFillColor(sf::Color::Green); // Задаем цвет клетки
+
+    // Инициализируем матрицу весов
+    std::vector<int> localWeights(64, 0);
+
+    for (int i = 0; i < 64; ++i) {
+            localWeights[i] = distrib(gen); // Заполняем случайными значениями
+            std::cout << localWeights[i] << " "; // Отладочный вывод
+
+    }
+    std::cout << std::endl;
+
+    // Добавляем новую клетку в список
+    cells.push_back({rect, localWeights, 1, 0});
+}

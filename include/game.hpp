@@ -13,7 +13,7 @@ const int HEIGHT = 1280;
 
 
 class Game {
-    const int inputSize = 9; // Количество входных нейронов
+    const int inputSize = 8; // Количество входных нейронов
     const int hiddenSize = 20; // Количество скрытых нейронов
     const int outputSize = 4; // Количество выходных нейронов
     const int eatMAX = 200; // максимально еды
@@ -32,10 +32,8 @@ class Game {
     float zoomFactor = 1.0f;
     float moveSpeed = 5.0f;
     int SCENE = 1; // сцена
-    int times = 0;// время 
-    int ages = 20; // среднее продолжительность жизни
+    int times = 0;// время
     int speed = 1; // в будусщем скорость действий
-    bool new_cell = false; //появления новой клетки
     bool stopUPDATE = false;
     int RGBChanges = 1;
     unsigned long long keyCell = 0;
@@ -56,9 +54,16 @@ class Game {
    //      std::vector<std::vector<double>> weights1; // веса нейронной сети 1
    //      std::vector<std::vector<double>> weights2; // веса нейронной сети 2
     //};
+    typedef std::vector<std::vector<int>> weights;//ген
     struct struct_cell
     {
-        sf::RectangleShape shape;
+        mutable sf::RectangleShape shape;
+        std::vector<int> weights1;//ген
+        mutable int type; //тип
+        mutable int programCounter = 0; //программа
+        int see = 0;
+        int parent = -1;
+        int energyT[4] = {0,0,0,0};
     };
     //std::map<unsigned long long, struct_cell> cells;//клетки
     std::vector<struct_cell> cells;//клетки
@@ -67,6 +72,11 @@ class Game {
     void console(); //в будущем консоль
     static double generateCell(double x, double y, double scale, int octaves, double persistence, unsigned int seed);
     void createCell(unsigned int seed);
+    void createCell();
+    void interpret(const struct_cell& Cell);
+
+    static void updateProgramCounter(const struct_cell &Cell, int count);
+    static int updateProgramCounterReturn(const struct_cell &Cell, int count);
 
 public:
     Game();//конструктор
