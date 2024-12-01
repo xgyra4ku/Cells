@@ -67,6 +67,7 @@ class Game {
     };
     //std::map<unsigned long long, struct_cell> cells;//клетки
     std::vector<struct_cell> cells;//клетки
+    std::vector<struct_cell> newCells;
 
     void events();//Эвенты
     void console(); //в будущем консоль
@@ -75,11 +76,14 @@ class Game {
     void createCell();
     void interpret(const struct_cell& Cell);
 
+    void createCellParent(int type, sf::Vector2f pos, const std::vector<int> &weigs, int programCounter);
+
     static void updateProgramCounter(const struct_cell &Cell, int count);
     static int updateProgramCounterReturn(const struct_cell &Cell, int count);
 
 public:
     Game();//конструктор
     ~Game();//диструктор
+
     void run();// начальная функция
 };
